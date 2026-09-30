@@ -12,6 +12,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     name: 'Pecuniae',
+    icon: 'src/assets/icons/pecuniae',
     // Vite bundles app code, while the native SQLite module must be copied so
     // Forge can rebuild it and AutoUnpackNatives can place its binary outside ASAR.
     ignore: (file) => {
