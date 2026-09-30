@@ -9,6 +9,7 @@ import { TransactionForm } from '../TransactionForm/TransactionForm';
 import { TransactionList } from '../TransactionList/TransactionList';
 import styles from './App.module.scss';
 import { getCurrentMonth } from '../../utils/format';
+import { LoadingScreen } from '../LoadingScreen/LoadingScreen';
 
 type Theme = 'light' | 'dark';
 
@@ -25,6 +26,7 @@ export function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth);
   const [dataVersion, setDataVersion] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refresh = async () => {
     const [nextDashboard, nextOptions] = await Promise.all([
@@ -37,13 +39,17 @@ export function App() {
   };
 
   useEffect(() => {
-    void refresh().catch(() => setLoadError('Could not load your data.'));
+    void refresh()
+      .catch(() => setLoadError('Could not load your data.'))
+      .finally(() => setIsLoading(false));
   }, [selectedMonth]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem('pecuniae-theme', theme);
   }, [theme]);
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <main className={styles.app}>

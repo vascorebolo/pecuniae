@@ -177,7 +177,12 @@ export function TransactionForm({
           />
         </label>
         {error && <p className={styles.error}>{error}</p>}
-        <Button variant="primary" className={styles.primary} disabled={saving}>
+        <Button
+          variant="primary"
+          className={styles.primary}
+          type="submit"
+          disabled={saving}
+        >
           {saving ? 'Saving…' : `Add ${type}`}
         </Button>
       </form>

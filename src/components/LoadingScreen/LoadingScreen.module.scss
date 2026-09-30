@@ -1,0 +1,31 @@
+.loading {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+
+  img {
+    width: 260px;
+    height: auto;
+  }
+  span {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--focus);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+  }
+  p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

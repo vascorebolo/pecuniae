@@ -3,9 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <title>Pecuniae</title>
+    <script>
+      const savedTheme = localStorage.getItem('pecuniae-theme');
+      const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.theme =
+        savedTheme || (prefersDark ? 'dark' : 'light');
+    </script>
+    <style>
+      html {
+        background: #f4f1eb;
+      }
+      html[data-theme='dark'] {
+        background: #151816;
+      }
+      body {
+        margin: 0;
+      }
+      .startup {
+        display: grid;
+        min-height: 100vh;
+        place-content: center;
+        justify-items: center;
+        gap: 22px;
+      }
+      .startup img {
+        width: 260px;
+        height: auto;
+      }
+      .startup span {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(22, 135, 248, 0.2);
+        border-top-color: #1687f8;
+        border-radius: 50%;
+        animation: startup-spin 0.75s linear infinite;
+      }
+      @keyframes startup-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="startup" aria-label="Loading Pecuniae">
+        <img src="/src/assets/logo.svg" alt="Pecuniae" /><span
+          aria-hidden="true"
+        ></span>
+      </div>
+    </div>
     <script type="module" src="/src/renderer.tsx"></script>
   </body>
 </html>
