@@ -2,18 +2,43 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { DatabaseService } from './database';
-import type { CreateTransactionInput } from './shared';
+import type {
+  CreateCategoryInput,
+  CreateTransactionInput,
+  UpdateTransactionInput,
+} from './shared';
 
 if (started) app.quit();
 
 let database: DatabaseService | undefined;
 
 const registerIpc = (db: DatabaseService) => {
-  ipcMain.handle('pecuniae:get-dashboard', () => db.getDashboard());
+  ipcMain.handle('pecuniae:get-dashboard', (_event, month?: string) =>
+    db.getDashboard(month),
+  );
+  ipcMain.handle(
+    'pecuniae:get-analytics',
+    (_event, scope: 'all' | 'month', month: string) =>
+      db.getAnalytics(scope, month),
+  );
   ipcMain.handle('pecuniae:get-form-options', () => db.getFormOptions());
   ipcMain.handle(
     'pecuniae:add-transaction',
     (_event, input: CreateTransactionInput) => db.addTransaction(input),
+  );
+  ipcMain.handle(
+    'pecuniae:create-category',
+    (_event, input: CreateCategoryInput) => db.createCategory(input),
+  );
+  ipcMain.handle('pecuniae:delete-category', (_event, id: number) =>
+    db.deleteCategory(id),
+  );
+  ipcMain.handle(
+    'pecuniae:update-transaction',
+    (_event, input: UpdateTransactionInput) => db.updateTransaction(input),
+  );
+  ipcMain.handle('pecuniae:delete-transaction', (_event, id: number) =>
+    db.deleteTransaction(id),
   );
 };
 

@@ -1,0 +1,62 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+
+  .logo {
+    display: block;
+    width: 250px;
+    height: auto;
+    margin-top: 7px;
+  }
+
+  .eyebrow {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .themeToggle {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text);
+    background: var(--surface);
+    font-size: 18px;
+
+    &:hover {
+      background: var(--surface-muted);
+    }
+    &:focus-visible {
+      outline: 3px solid var(--focus);
+    }
+  }
+
+  .balance {
+    text-align: right;
+
+    span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    strong {
+      font-family: Georgia, serif;
+      font-size: 30px;
+      font-weight: 500;
+    }
+  }
+}

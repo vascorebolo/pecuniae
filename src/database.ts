@@ -1,11 +1,14 @@
 import Database from 'better-sqlite3';
 import type {
   Account,
+  Analytics,
   Category,
+  CreateCategoryInput,
   CreateTransactionInput,
   Dashboard,
   FormOptions,
   Transaction,
+  UpdateTransactionInput,
 } from './shared';
 
 const migrations = [
@@ -98,7 +101,89 @@ export class DatabaseService {
     return { accounts, categories };
   }
 
+  createCategory(input: CreateCategoryInput): Category {
+    const name = input.name.trim().replace(/\s+/g, ' ').slice(0, 60);
+    if (!name) throw new Error('Category name is required.');
+    if (input.type !== 'income' && input.type !== 'expense') {
+      throw new Error('Category type is invalid.');
+    }
+    try {
+      const result = this.db
+        .prepare('INSERT INTO categories (name, type) VALUES (?, ?)')
+        .run(name, input.type);
+      return this.db
+        .prepare('SELECT id, name, type FROM categories WHERE id = ?')
+        .get(result.lastInsertRowid) as Category;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('UNIQUE')) {
+        throw new Error('That category already exists.');
+      }
+      throw error;
+    }
+  }
+
+  deleteCategory(id: number): void {
+    if (!Number.isSafeInteger(id)) throw new Error('Category is invalid.');
+    const usage = this.db
+      .prepare(
+        'SELECT COUNT(*) AS count FROM transactions WHERE category_id = ?',
+      )
+      .get(id) as { count: number };
+    if (usage.count > 0) {
+      throw new Error('Categories used by transactions cannot be deleted.');
+    }
+    const result = this.db
+      .prepare('DELETE FROM categories WHERE id = ?')
+      .run(id);
+    if (!result.changes) throw new Error('Category not found.');
+  }
+
   addTransaction(input: CreateTransactionInput): Transaction {
+    this.validateTransaction(input);
+    const result = this.db
+      .prepare(`INSERT INTO transactions
+      (account_id, category_id, type, amount_cents, description, transaction_date)
+      VALUES (?, ?, ?, ?, ?, ?)`)
+      .run(
+        input.accountId,
+        input.categoryId,
+        input.type,
+        input.amountCents,
+        input.description.trim().slice(0, 200),
+        input.transactionDate,
+      );
+    return this.getTransaction(Number(result.lastInsertRowid));
+  }
+
+  updateTransaction(input: UpdateTransactionInput): Transaction {
+    if (!Number.isSafeInteger(input.id))
+      throw new Error('Transaction is invalid.');
+    this.validateTransaction(input);
+    const result = this.db
+      .prepare(`UPDATE transactions SET account_id = ?, category_id = ?, type = ?,
+        amount_cents = ?, description = ?, transaction_date = ? WHERE id = ?`)
+      .run(
+        input.accountId,
+        input.categoryId,
+        input.type,
+        input.amountCents,
+        input.description.trim().slice(0, 200),
+        input.transactionDate,
+        input.id,
+      );
+    if (!result.changes) throw new Error('Transaction not found.');
+    return this.getTransaction(input.id);
+  }
+
+  deleteTransaction(id: number): void {
+    if (!Number.isSafeInteger(id)) throw new Error('Transaction is invalid.');
+    const result = this.db
+      .prepare('DELETE FROM transactions WHERE id = ?')
+      .run(id);
+    if (!result.changes) throw new Error('Transaction not found.');
+  }
+
+  private validateTransaction(input: CreateTransactionInput): void {
     if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) {
       throw new Error('Amount must be a positive number of cents.');
     }
@@ -115,20 +200,6 @@ export class DatabaseService {
         .get(input.accountId)
     )
       throw new Error('Account not found.');
-
-    const result = this.db
-      .prepare(`INSERT INTO transactions
-      (account_id, category_id, type, amount_cents, description, transaction_date)
-      VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(
-        input.accountId,
-        input.categoryId,
-        input.type,
-        input.amountCents,
-        input.description.trim().slice(0, 200),
-        input.transactionDate,
-      );
-    return this.getTransaction(Number(result.lastInsertRowid));
   }
 
   private getTransaction(id: number): Transaction {
@@ -139,10 +210,14 @@ export class DatabaseService {
     return mapTransaction(row);
   }
 
-  getDashboard(): Dashboard {
+  getDashboard(month?: string): Dashboard {
     const now = new Date();
-    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const selectedMonth =
+      month && /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? month : currentMonth;
+    const [year, monthNumber] = selectedMonth.split('-').map(Number);
+    const monthStart = `${selectedMonth}-01`;
+    const nextMonth = new Date(year, monthNumber, 1);
     const monthEnd = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-01`;
     const totals = this.db
       .prepare(`SELECT
@@ -157,14 +232,47 @@ export class DatabaseService {
     };
     const rows = this.db
       .prepare(
-        `${transactionSelect} ORDER BY t.transaction_date DESC, t.id DESC LIMIT 20`,
+        `${transactionSelect} WHERE t.transaction_date >= ? AND t.transaction_date < ?
+         ORDER BY t.transaction_date DESC, t.id DESC LIMIT 100`,
       )
-      .all() as TransactionRow[];
+      .all(monthStart, monthEnd) as TransactionRow[];
     return {
+      month: selectedMonth,
       balanceCents: totals.balance,
       monthIncomeCents: totals.month_income,
       monthExpenseCents: totals.month_expense,
       recentTransactions: rows.map(mapTransaction),
+    };
+  }
+
+  getAnalytics(scope: 'all' | 'month', month: string): Analytics {
+    if (scope !== 'all' && scope !== 'month')
+      throw new Error('Analytics scope is invalid.');
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))
+      throw new Error('Analytics month is invalid.');
+    const [year, monthNumber] = month.split('-').map(Number);
+    const monthStart = `${month}-01`;
+    const nextMonth = new Date(year, monthNumber, 1);
+    const monthEnd = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-01`;
+    const where =
+      scope === 'month'
+        ? 'WHERE t.transaction_date >= ? AND t.transaction_date < ?'
+        : '';
+    const parameters = scope === 'month' ? [monthStart, monthEnd] : [];
+    const rows = this.db
+      .prepare(`SELECT c.id AS categoryId, c.name AS categoryName, t.type,
+        SUM(t.amount_cents) AS amountCents FROM transactions t
+        JOIN categories c ON c.id = t.category_id ${where}
+        GROUP BY c.id, c.name, t.type ORDER BY amountCents DESC`)
+      .all(...parameters) as Analytics['categoryTotals'];
+    return {
+      incomeCents: rows
+        .filter((row) => row.type === 'income')
+        .reduce((sum, row) => sum + row.amountCents, 0),
+      expenseCents: rows
+        .filter((row) => row.type === 'expense')
+        .reduce((sum, row) => sum + row.amountCents, 0),
+      categoryTotals: rows,
     };
   }
 

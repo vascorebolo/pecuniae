@@ -1,0 +1,25 @@
+.app {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 42px 48px 56px;
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.78fr) 1.4fr;
+    gap: 14px;
+  }
+
+  .error {
+    margin: 0 0 14px;
+    color: var(--danger);
+    font-size: 13px;
+  }
+
+  @media (max-width: 820px) {
+    padding: 32px;
+
+    .layout {
+      grid-template-columns: 310px 1fr;
+    }
+  }
+}
