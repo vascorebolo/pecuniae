@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Category, Transaction, TransactionType } from '../../shared';
 import { formatMoney, formatMonth } from '../../utils/format';
 import styles from './TransactionList.module.scss';
@@ -29,6 +29,35 @@ export function TransactionList({
   const [edit, setEdit] = useState<EditState>();
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [query, setQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [typeFilter, setTypeFilter] = useState<'all' | TransactionType>('all');
+
+  const visibleTransactions = useMemo(() => {
+    const search = query.trim().toLocaleLowerCase();
+    return transactions
+      .filter((item) => {
+        if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+        if (!search) return true;
+        return [
+          item.description,
+          item.categoryName,
+          item.accountName,
+          item.type,
+          item.transactionDate,
+          String(item.amountCents / 100),
+        ].some((value) => value.toLocaleLowerCase().includes(search));
+      })
+      .sort((left, right) => {
+        const comparison =
+          sortBy === 'date'
+            ? left.transactionDate.localeCompare(right.transactionDate) ||
+              left.id - right.id
+            : left.amountCents - right.amountCents || left.id - right.id;
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+  }, [transactions, query, sortBy, sortDirection, typeFilter]);
 
   const startEditing = (item: Transaction) => {
     setError('');
@@ -92,6 +121,51 @@ export function TransactionList({
   return (
     <section className={styles.panel}>
       <h2>Transactions · {formatMonth(month)}</h2>
+      <div className={styles.typeFilter} aria-label="Filter transaction type">
+        {(['all', 'expense', 'income'] as const).map((filter) => (
+          <Button
+            key={filter}
+            className={typeFilter === filter ? styles.active : ''}
+            onClick={() => setTypeFilter(filter)}
+            aria-pressed={typeFilter === filter}
+          >
+            {filter === 'all'
+              ? 'All'
+              : filter === 'expense'
+                ? 'Expenses'
+                : 'Income'}
+          </Button>
+        ))}
+      </div>
+      <div className={styles.toolbar}>
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search transactions"
+          aria-label="Search transactions"
+        />
+        <select
+          value={sortBy}
+          onChange={(event) =>
+            setSortBy(event.target.value as 'date' | 'amount')
+          }
+          aria-label="Sort transactions by"
+        >
+          <option value="date">Date</option>
+          <option value="amount">Amount</option>
+        </select>
+        <select
+          value={sortDirection}
+          onChange={(event) =>
+            setSortDirection(event.target.value as 'asc' | 'desc')
+          }
+          aria-label="Sort direction"
+        >
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
+      </div>
       {error && <p className={styles.error}>{error}</p>}
       {!transactions.length ? (
         <div className={styles.empty}>
@@ -99,9 +173,11 @@ export function TransactionList({
           <p>No transactions yet.</p>
           <small>Add your first one to get started.</small>
         </div>
+      ) : !visibleTransactions.length ? (
+        <div className={styles.noResults}>No matching transactions found.</div>
       ) : (
         <ul>
-          {transactions.map((item) =>
+          {visibleTransactions.map((item) =>
             edit?.id === item.id ? (
               <li className={styles.editRow} key={item.id}>
                 <div className={styles.editGrid}>

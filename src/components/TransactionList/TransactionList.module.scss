@@ -6,13 +6,59 @@
   box-shadow: 0 2px 12px var(--shadow);
 
   h2 {
-    margin: 0 0 22px;
+    margin: 0 0 16px;
     font-size: 17px;
   }
+  .typeFilter {
+    display: flex;
+    width: fit-content;
+    margin-bottom: 9px;
+    padding: 3px;
+    border-radius: 7px;
+    background: var(--surface-muted);
+
+    button {
+      padding: 6px 10px;
+      color: var(--text-muted);
+      font-size: 11px;
+
+      &.active {
+        color: var(--text);
+        background: var(--surface-active);
+        box-shadow: 0 1px 4px var(--shadow);
+      }
+    }
+  }
+  .toolbar {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 90px 118px;
+    gap: 7px;
+    margin-bottom: 14px;
+
+    input,
+    select {
+      min-width: 0;
+      padding: 8px 9px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
+      color: var(--text);
+      background: var(--surface-active);
+      font-size: 11px;
+
+      &:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--focus);
+      }
+    }
+  }
   ul {
-    margin: -8px 0 0;
-    padding: 0;
+    max-height: 820px;
+    margin: 0;
+    padding: 0 6px 0 0;
     list-style: none;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
   li {
     border-bottom: 1px solid var(--divider);
@@ -150,9 +196,16 @@
     color: var(--negative);
   }
   .error {
-    margin: -10px 0 12px;
+    margin: 0 0 12px;
     color: var(--danger);
     font-size: 12px;
+  }
+
+  .noResults {
+    padding: 44px 12px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
   }
 
   .empty {
