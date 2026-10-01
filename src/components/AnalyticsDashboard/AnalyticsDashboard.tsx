@@ -15,6 +15,7 @@ export function AnalyticsDashboard({ month, dataVersion }: Props) {
   const [analytics, setAnalytics] = useState<Analytics>();
   const [error, setError] = useState('');
   const [excluded, setExcluded] = useState<Set<number>>(() => new Set());
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -127,10 +128,27 @@ export function AnalyticsDashboard({ month, dataVersion }: Props) {
                   onExclude={exclude}
                 />
               </div>
-              <div className={styles.charts}>
-                <Chart title="Expenses" type="expense" rows={groups.expense} />
-                <Chart title="Income" type="income" rows={groups.income} />
-              </div>
+              <Button
+                className={styles.breakdownToggle}
+                variant="surface"
+                aria-expanded={showBreakdown}
+                onClick={() => setShowBreakdown((visible) => !visible)}
+              >
+                {showBreakdown
+                  ? 'Hide detailed breakdown'
+                  : 'Show detailed breakdown'}
+                <span aria-hidden="true">{showBreakdown ? '⌃' : '⌄'}</span>
+              </Button>
+              {showBreakdown && (
+                <div className={styles.charts}>
+                  <Chart
+                    title="Expenses"
+                    type="expense"
+                    rows={groups.expense}
+                  />
+                  <Chart title="Income" type="income" rows={groups.income} />
+                </div>
+              )}
             </>
           )}
         </div>

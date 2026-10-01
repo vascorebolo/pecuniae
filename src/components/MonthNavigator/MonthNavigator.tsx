@@ -11,16 +11,27 @@ export function MonthNavigator({ month, onMonthChange }: MonthNavigatorProps) {
   const currentMonth = getCurrentMonth();
   return (
     <nav className={styles.navigator} aria-label="Transaction month">
-      <Button
-        type="button"
-        onClick={() => onMonthChange(shiftMonth(month, -1))}
-        aria-label="Previous month"
-      >
-        ‹
-      </Button>
-      <div>
-        <span>Viewing</span>
-        <strong>{formatMonth(month)}</strong>
+      <div className={styles.monthControls}>
+        <Button
+          className={styles.previous}
+          type="button"
+          onClick={() => onMonthChange(shiftMonth(month, -1))}
+          aria-label="Previous month"
+        >
+          ‹
+        </Button>
+        <div className={styles.monthLabel}>
+          <span>Viewing</span>
+          <strong>{formatMonth(month)}</strong>
+        </div>
+        <Button
+          className={styles.next}
+          type="button"
+          onClick={() => onMonthChange(shiftMonth(month, 1))}
+          aria-label="Next month"
+        >
+          ›
+        </Button>
       </div>
       <Button
         className={styles.current}
@@ -29,13 +40,6 @@ export function MonthNavigator({ month, onMonthChange }: MonthNavigatorProps) {
         disabled={month === currentMonth}
       >
         Current month
-      </Button>
-      <Button
-        type="button"
-        onClick={() => onMonthChange(shiftMonth(month, 1))}
-        aria-label="Next month"
-      >
-        ›
       </Button>
     </nav>
   );

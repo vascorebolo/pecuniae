@@ -106,9 +106,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
-    margin-bottom: 26px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--divider);
+    margin-bottom: 18px;
   }
   .pieCard {
     display: flex;
@@ -179,10 +177,32 @@
     color: var(--text-muted);
     font-size: 11px;
   }
+  .breakdownToggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px;
+    color: var(--text-muted);
+    background: var(--surface-muted);
+
+    &:hover {
+      color: var(--text);
+      background: var(--surface-active);
+    }
+    span {
+      color: inherit;
+      font-size: 13px;
+    }
+  }
   .charts {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1px solid var(--divider);
   }
   .chartTitle {
     display: flex;
