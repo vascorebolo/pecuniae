@@ -221,6 +221,25 @@
       font-size: 13px;
     }
   }
+  .breakdownTransition.expanded {
+    .track span {
+      transform-origin: left center;
+      animation: revealBar 0.55s ease-out 0.18s both;
+    }
+
+    .barRow:nth-child(2) .track span {
+      animation-delay: 0.23s;
+    }
+    .barRow:nth-child(3) .track span {
+      animation-delay: 0.28s;
+    }
+    .barRow:nth-child(4) .track span {
+      animation-delay: 0.33s;
+    }
+    .barRow:nth-child(n + 5) .track span {
+      animation-delay: 0.38s;
+    }
+  }
   .charts {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -234,6 +253,10 @@
     .panelTransition,
     .breakdownTransition {
       transition-duration: 0.01ms;
+    }
+    .breakdownTransition.expanded .track span {
+      animation-duration: 0.01ms;
+      animation-delay: 0s;
     }
   }
   .chartTitle {
@@ -295,5 +318,16 @@
   }
   .error {
     color: var(--danger);
+  }
+}
+
+@keyframes revealBar {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
   }
 }

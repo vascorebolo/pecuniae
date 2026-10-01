@@ -19,6 +19,12 @@
     text-transform: uppercase;
   }
 
+  .topline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
   .actions {
     display: flex;
     align-items: center;
@@ -27,14 +33,14 @@
 
   .themeToggle {
     display: grid;
-    width: 36px;
-    height: 36px;
+    width: 24px;
+    height: 24px;
     place-items: center;
     border: 1px solid var(--border);
     border-radius: 50%;
     color: var(--text);
     background: var(--surface);
-    font-size: 18px;
+    font-size: 12px;
 
     &:hover {
       background: var(--surface-muted);
