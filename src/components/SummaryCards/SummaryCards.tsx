@@ -1,5 +1,6 @@
 import { formatMoney } from '../../utils/format';
 import styles from './SummaryCards.module.scss';
+import { Icon } from '../Icon/Icon';
 
 interface SummaryCardsProps {
   incomeCents: number;
@@ -11,17 +12,26 @@ export function SummaryCards({ incomeCents, expenseCents }: SummaryCardsProps) {
   return (
     <section className={styles.summary} aria-label="Monthly summary">
       <article>
-        <span>Income</span>
+        <span>
+          <Icon name="income" />
+          Income
+        </span>
         <strong className={styles.positive}>+{formatMoney(incomeCents)}</strong>
       </article>
       <article>
-        <span>Expenses</span>
+        <span>
+          <Icon name="expense" />
+          Expenses
+        </span>
         <strong className={styles.negative}>
           −{formatMoney(expenseCents)}
         </strong>
       </article>
       <article>
-        <span>Monthly balance</span>
+        <span>
+          <Icon name="balance" />
+          Monthly balance
+        </span>
         <strong
           className={balanceCents >= 0 ? styles.positive : styles.negative}
         >

@@ -3,6 +3,7 @@ import type { Analytics, TransactionType } from '../../shared';
 import { formatMoney, formatMonth } from '../../utils/format';
 import styles from './AnalyticsDashboard.module.scss';
 import { Button } from '../Button/Button';
+import { Icon } from '../Icon/Icon';
 
 interface Props {
   month: string;
@@ -59,7 +60,10 @@ export function AnalyticsDashboard({ month, dataVersion }: Props) {
     <section className={styles.dashboard}>
       <div className={styles.heading}>
         <div>
-          <span>Overview</span>
+          <span className={styles.title}>
+            <Icon name="overview" />
+            Overview
+          </span>
           <strong>{scope === 'all' ? 'All time' : formatMonth(month)}</strong>
         </div>
         <div className={styles.controls}>

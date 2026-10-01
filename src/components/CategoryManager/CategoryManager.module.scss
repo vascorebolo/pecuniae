@@ -21,6 +21,16 @@
     }
   }
 
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    svg {
+      color: var(--accent);
+    }
+  }
+
   .content {
     padding: 6px 24px 24px;
     border-top: 1px solid var(--divider);

@@ -6,8 +6,15 @@
   box-shadow: 0 2px 12px var(--shadow);
 
   h2 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     margin: 0 0 22px;
     font-size: 17px;
+
+    svg {
+      color: var(--accent);
+    }
   }
 
   .segmented {

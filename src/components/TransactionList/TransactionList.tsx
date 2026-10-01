@@ -3,6 +3,7 @@ import type { Category, Transaction, TransactionType } from '../../shared';
 import { formatMoney, formatMonth } from '../../utils/format';
 import styles from './TransactionList.module.scss';
 import { Button } from '../Button/Button';
+import { Icon } from '../Icon/Icon';
 
 interface Props {
   transactions: Transaction[];
@@ -141,7 +142,10 @@ export function TransactionList({
 
   return (
     <section className={styles.panel}>
-      <h2>Transactions · {formatMonth(month)}</h2>
+      <h2>
+        <Icon name="transactions" />
+        Transactions · {formatMonth(month)}
+      </h2>
       <div className={styles.typeFilter} aria-label="Filter transaction type">
         {(['all', 'expense', 'income'] as const).map((filter) => (
           <Button

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Category, TransactionType } from '../../shared';
 import styles from './CategoryManager.module.scss';
 import { Button } from '../Button/Button';
+import { Icon } from '../Icon/Icon';
 
 interface CategoryManagerProps {
   categories: Category[];
@@ -55,7 +56,10 @@ export function CategoryManager({
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
       >
-        <span>Manage categories</span>
+        <span className={styles.title}>
+          <Icon name="categories" />
+          Manage categories
+        </span>
         <span>{open ? '−' : '+'}</span>
       </Button>
       <div

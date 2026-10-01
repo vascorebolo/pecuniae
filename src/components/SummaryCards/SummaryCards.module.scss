@@ -12,10 +12,16 @@
     box-shadow: 0 2px 12px var(--shadow);
 
     span {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin-bottom: 5px;
       color: var(--text-muted);
       font-size: 12px;
+
+      svg {
+        color: var(--accent);
+      }
     }
     strong {
       font-size: 20px;

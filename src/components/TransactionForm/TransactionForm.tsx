@@ -3,6 +3,7 @@ import type { FormOptions, TransactionType } from '../../shared';
 import { getToday } from '../../utils/format';
 import styles from './TransactionForm.module.scss';
 import { Button } from '../Button/Button';
+import { Icon } from '../Icon/Icon';
 
 interface TransactionFormProps {
   options?: FormOptions;
@@ -89,7 +90,10 @@ export function TransactionForm({
 
   return (
     <section className={styles.panel}>
-      <h2>Add transaction</h2>
+      <h2>
+        <Icon name="add" />
+        Add transaction
+      </h2>
       <div className={styles.segmented}>
         {(['expense', 'income'] as const).map((item) => (
           <Button
