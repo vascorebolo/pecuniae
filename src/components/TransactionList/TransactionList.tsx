@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Category, Transaction, TransactionType } from '../../shared';
 import { formatMoney, formatMonth } from '../../utils/format';
 import styles from './TransactionList.module.scss';
@@ -33,6 +33,26 @@ export function TransactionList({
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [typeFilter, setTypeFilter] = useState<'all' | TransactionType>('all');
+  const [highlightedId, setHighlightedId] = useState<number>();
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+
+  useEffect(
+    () => () => {
+      if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    },
+    [],
+  );
+
+  const pulseRow = (id: number) => {
+    if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    setHighlightedId(id);
+    highlightTimer.current = setTimeout(
+      () => setHighlightedId(undefined),
+      1200,
+    );
+  };
 
   const visibleTransactions = useMemo(() => {
     const search = query.trim().toLocaleLowerCase();
@@ -90,6 +110,7 @@ export function TransactionList({
         transactionDate: edit.transactionDate,
       });
       setEdit(undefined);
+      pulseRow(edit.id);
       await onTransactionsChanged();
     } catch (problem) {
       setError(
@@ -181,6 +202,15 @@ export function TransactionList({
             edit?.id === item.id ? (
               <li className={styles.editRow} key={item.id}>
                 <div className={styles.editGrid}>
+                  <input
+                    className={styles.description}
+                    value={edit.description}
+                    onChange={(event) =>
+                      setEdit({ ...edit, description: event.target.value })
+                    }
+                    placeholder="Description"
+                    maxLength={200}
+                  />
                   <select
                     value={edit.type}
                     onChange={(event) =>
@@ -220,14 +250,6 @@ export function TransactionList({
                       ))}
                   </select>
                   <input
-                    value={edit.description}
-                    onChange={(event) =>
-                      setEdit({ ...edit, description: event.target.value })
-                    }
-                    placeholder="Description"
-                    maxLength={200}
-                  />
-                  <input
                     type="date"
                     value={edit.transactionDate}
                     onChange={(event) =>
@@ -236,7 +258,13 @@ export function TransactionList({
                   />
                 </div>
                 <div className={styles.editActions}>
-                  <Button type="button" onClick={() => setEdit(undefined)}>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setEdit(undefined);
+                      pulseRow(item.id);
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button
@@ -251,7 +279,10 @@ export function TransactionList({
                 </div>
               </li>
             ) : (
-              <li className={styles.transactionRow} key={item.id}>
+              <li
+                className={`${styles.transactionRow} ${highlightedId === item.id ? styles.pulse : ''}`}
+                key={item.id}
+              >
                 <div className={styles.details}>
                   <strong>{item.description || item.categoryName}</strong>
                   <span>

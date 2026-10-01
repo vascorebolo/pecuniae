@@ -88,71 +88,92 @@ export function AnalyticsDashboard({ month, dataVersion }: Props) {
           </Button>
         </div>
       </div>
-      {open && (
-        <div className={styles.content}>
-          {error ? (
-            <p className={styles.error}>{error}</p>
-          ) : allRows.length === 0 ? (
-            <p className={styles.empty}>No transactions in this period yet.</p>
-          ) : (
-            <>
-              {hiddenRows.length > 0 && (
-                <div className={styles.hiddenCategories}>
-                  <span>Excluded:</span>
-                  {hiddenRows.map((row) => (
-                    <Button
-                      key={row.categoryId}
-                      type="button"
-                      onClick={() => restore(row.categoryId)}
-                    >
-                      {row.categoryName} ×
-                    </Button>
-                  ))}
-                  <Button type="button" onClick={() => setExcluded(new Set())}>
-                    Restore all
-                  </Button>
-                </div>
-              )}
-              <p className={styles.hint}>
-                Double-click a slice or legend item to exclude that category.
+      <div
+        className={`${styles.panelTransition} ${open ? styles.expanded : ''}`}
+        aria-hidden={!open}
+        inert={!open}
+      >
+        <div className={styles.panelTransitionInner}>
+          <div className={styles.content}>
+            {error ? (
+              <p className={styles.error}>{error}</p>
+            ) : allRows.length === 0 ? (
+              <p className={styles.empty}>
+                No transactions in this period yet.
               </p>
-              <div className={styles.pies}>
-                <PieChart
-                  title="Expense distribution"
-                  rows={groups.expense}
-                  onExclude={exclude}
-                />
-                <PieChart
-                  title="Income distribution"
-                  rows={groups.income}
-                  onExclude={exclude}
-                />
-              </div>
-              <Button
-                className={styles.breakdownToggle}
-                variant="surface"
-                aria-expanded={showBreakdown}
-                onClick={() => setShowBreakdown((visible) => !visible)}
-              >
-                {showBreakdown
-                  ? 'Hide detailed breakdown'
-                  : 'Show detailed breakdown'}
-                <span aria-hidden="true">{showBreakdown ? '⌃' : '⌄'}</span>
-              </Button>
-              {showBreakdown && (
-                <div className={styles.charts}>
-                  <Chart
-                    title="Expenses"
-                    type="expense"
+            ) : (
+              <>
+                {hiddenRows.length > 0 && (
+                  <div className={styles.hiddenCategories}>
+                    <span>Excluded:</span>
+                    {hiddenRows.map((row) => (
+                      <Button
+                        key={row.categoryId}
+                        type="button"
+                        onClick={() => restore(row.categoryId)}
+                      >
+                        {row.categoryName} ×
+                      </Button>
+                    ))}
+                    <Button
+                      type="button"
+                      onClick={() => setExcluded(new Set())}
+                    >
+                      Restore all
+                    </Button>
+                  </div>
+                )}
+                <p className={styles.hint}>
+                  Double-click a slice or legend item to exclude that category.
+                </p>
+                <div className={styles.pies}>
+                  <PieChart
+                    title="Expense distribution"
                     rows={groups.expense}
+                    onExclude={exclude}
                   />
-                  <Chart title="Income" type="income" rows={groups.income} />
+                  <PieChart
+                    title="Income distribution"
+                    rows={groups.income}
+                    onExclude={exclude}
+                  />
                 </div>
-              )}
-            </>
-          )}
+                <Button
+                  className={styles.breakdownToggle}
+                  variant="surface"
+                  aria-expanded={showBreakdown}
+                  onClick={() => setShowBreakdown((visible) => !visible)}
+                >
+                  {showBreakdown
+                    ? 'Hide detailed breakdown'
+                    : 'Show detailed breakdown'}
+                  <span aria-hidden="true">{showBreakdown ? '-' : '+'}</span>
+                </Button>
+                <div
+                  className={`${styles.breakdownTransition} ${showBreakdown ? styles.expanded : ''}`}
+                  aria-hidden={!showBreakdown}
+                  inert={!showBreakdown}
+                >
+                  <div className={styles.breakdownTransitionInner}>
+                    <div className={styles.charts}>
+                      <Chart
+                        title="Expenses"
+                        type="expense"
+                        rows={groups.expense}
+                      />
+                      <Chart
+                        title="Income"
+                        type="income"
+                        rows={groups.income}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </section>
   );
 }

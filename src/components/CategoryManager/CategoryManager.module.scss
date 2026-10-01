@@ -26,6 +26,25 @@
     border-top: 1px solid var(--divider);
   }
 
+  .transition {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.5s ease,
+      opacity 0.5s ease;
+
+    &.expanded {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+  }
+
+  .transitionInner {
+    min-height: 0;
+    overflow: hidden;
+  }
+
   form {
     display: grid;
     grid-template-columns: minmax(180px, 1fr) 150px auto;
@@ -90,6 +109,12 @@
           color: var(--negative);
         }
       }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .transition {
+      transition-duration: 0.01ms;
     }
   }
 }
