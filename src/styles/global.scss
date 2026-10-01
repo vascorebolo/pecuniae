@@ -10,6 +10,7 @@
     sans-serif;
   font-synthesis: none;
   --background: #f4f1eb;
+  --background-bottom: #dcd7ce;
   --surface: #fffdfa;
   --surface-muted: #efede7;
   --surface-active: #ffffff;
@@ -30,6 +31,7 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
   --background: #151816;
+  --background-bottom: #080a09;
   --surface: #1d211e;
   --surface-muted: #282d29;
   --surface-active: #353b36;
@@ -56,7 +58,13 @@ body {
   min-width: 760px;
   min-height: 100vh;
   color: var(--text);
-  background: var(--background);
+  background: linear-gradient(
+    to top,
+    var(--background) 0%,
+    var(--background) 60%,
+    var(--background-bottom) 100%
+  );
+  background-attachment: fixed;
   transition:
     color 160ms ease,
     background-color 160ms ease;
