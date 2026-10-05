@@ -150,6 +150,7 @@
   }
   .pie {
     display: grid;
+    position: relative;
     width: 126px;
     height: 126px;
     flex: 0 0 126px;
@@ -157,8 +158,25 @@
     border-radius: 50%;
     box-shadow: inset 0 0 0 1px var(--border);
     cursor: crosshair;
+    overflow: hidden;
+
+    &::after {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        circle at center,
+        transparent 30%,
+        rgba(0, 0, 0, 0.003) 30%,
+        rgba(0, 0, 0, 0.4) 100%
+      );
+      content: '';
+      pointer-events: none;
+    }
 
     span {
+      position: relative;
+      z-index: 1;
       color: var(--text-muted);
       font-size: 10px;
     }
@@ -305,12 +323,6 @@
       min-width: 3px;
       border-radius: inherit;
     }
-  }
-  .expenseBar {
-    background: var(--negative);
-  }
-  .incomeBar {
-    background: var(--positive);
   }
   .positive {
     color: var(--positive);

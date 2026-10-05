@@ -285,10 +285,10 @@ function Chart({ title, type, rows }: ChartProps) {
             </div>
             <div className={styles.track}>
               <span
-                className={
-                  type === 'income' ? styles.incomeBar : styles.expenseBar
-                }
-                style={{ width: `${(row.amountCents / maximum) * 100}%` }}
+                style={{
+                  width: `${(row.amountCents / maximum) * 100}%`,
+                  background: row.categoryColor,
+                }}
               />
             </div>
           </div>
