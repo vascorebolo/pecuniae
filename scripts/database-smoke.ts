@@ -12,13 +12,22 @@ try {
   const options = first.getFormOptions();
   assert.equal(options.accounts.length, 1);
   assert.ok(options.categories.length >= 10);
-  const category = first.createCategory({
+  let category = first.createCategory({
     name: 'Side project',
     type: 'income',
+    color: '#4C8BF5',
   });
+  assert.match(category.color, /^#[0-9A-F]{6}$/i);
+  category = first.updateCategory({
+    ...category,
+    name: 'Side projects',
+    color: '#123ABC',
+  });
+  assert.equal(category.color, '#123ABC');
   const unusedCategory = first.createCategory({
     name: 'Temporary',
     type: 'expense',
+    color: '#D66A5C',
   });
   first.deleteCategory(unusedCategory.id);
   const transaction = first.addTransaction({
@@ -36,12 +45,16 @@ try {
   assert.equal(dashboard.balanceCents, 12345);
   assert.equal(dashboard.monthIncomeCents, 12345);
   assert.equal(dashboard.recentTransactions[0].description, 'Persistence test');
+  assert.equal(dashboard.recentTransactions[0].categoryColor, category.color);
   assert.ok(
     reopened
       .getFormOptions()
-      .categories.some((item) => item.name === 'Side project'),
+      .categories.some((item) => item.name === 'Side projects'),
   );
   assert.throws(() => reopened.deleteCategory(category.id));
+  assert.throws(() =>
+    reopened.updateCategory({ ...category, type: 'expense' }),
+  );
   reopened.addTransaction({
     accountId: options.accounts[0].id,
     categoryId: category.id,
@@ -56,7 +69,14 @@ try {
   assert.equal(reopened.getDashboard('2000-02').recentTransactions.length, 0);
   const monthlyAnalytics = reopened.getAnalytics('month', '2000-01');
   assert.equal(monthlyAnalytics.incomeCents, 500);
-  assert.equal(monthlyAnalytics.categoryTotals[0].categoryName, 'Side project');
+  assert.equal(
+    monthlyAnalytics.categoryTotals[0].categoryName,
+    'Side projects',
+  );
+  assert.equal(
+    monthlyAnalytics.categoryTotals[0].categoryColor,
+    category.color,
+  );
   assert.equal(reopened.getAnalytics('all', '2000-01').incomeCents, 12845);
   const updated = reopened.updateTransaction({
     id: transaction.id,

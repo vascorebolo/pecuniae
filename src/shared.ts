@@ -8,6 +8,7 @@ export interface Category {
   id: number;
   name: string;
   type: TransactionType;
+  color: string;
 }
 export interface Transaction {
   id: number;
@@ -15,6 +16,7 @@ export interface Transaction {
   accountName: string;
   categoryId: number;
   categoryName: string;
+  categoryColor: string;
   type: TransactionType;
   amountCents: number;
   description: string;
@@ -41,6 +43,7 @@ export interface Dashboard {
 export interface CategoryTotal {
   categoryId: number;
   categoryName: string;
+  categoryColor: string;
   type: TransactionType;
   amountCents: number;
 }
@@ -56,6 +59,10 @@ export interface FormOptions {
 export interface CreateCategoryInput {
   name: string;
   type: TransactionType;
+  color: string;
+}
+export interface UpdateCategoryInput extends CreateCategoryInput {
+  id: number;
 }
 export interface PecuniaeApi {
   getDashboard(month?: string): Promise<Dashboard>;
@@ -65,5 +72,6 @@ export interface PecuniaeApi {
   updateTransaction(input: UpdateTransactionInput): Promise<Transaction>;
   deleteTransaction(id: number): Promise<void>;
   createCategory(input: CreateCategoryInput): Promise<Category>;
+  updateCategory(input: UpdateCategoryInput): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
 }

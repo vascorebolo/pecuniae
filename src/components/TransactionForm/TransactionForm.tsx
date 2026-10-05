@@ -25,6 +25,7 @@ export function TransactionForm({
   const [saving, setSaving] = useState(false);
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryColor, setNewCategoryColor] = useState('#1687F8');
   const categories = useMemo(
     () => options?.categories.filter((item) => item.type === type) ?? [],
     [options, type],
@@ -38,6 +39,7 @@ export function TransactionForm({
       const category = await window.pecuniae.createCategory({
         name: newCategoryName,
         type,
+        color: newCategoryColor,
       });
       await onCategoriesChanged();
       setCategoryId(String(category.id));
@@ -152,6 +154,13 @@ export function TransactionForm({
               placeholder={`New ${type} category`}
               maxLength={60}
               autoFocus
+            />
+            <input
+              className={styles.colorPicker}
+              type="color"
+              value={newCategoryColor}
+              onChange={(event) => setNewCategoryColor(event.target.value)}
+              aria-label="Category color"
             />
             <Button
               type="button"

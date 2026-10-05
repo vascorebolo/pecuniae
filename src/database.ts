@@ -8,6 +8,7 @@ import type {
   Dashboard,
   FormOptions,
   Transaction,
+  UpdateCategoryInput,
   UpdateTransactionInput,
 } from './shared';
 
@@ -37,6 +38,21 @@ const migrations = [
       ('Other income', 'income'), ('Housing', 'expense'), ('Groceries', 'expense'),
       ('Transport', 'expense'), ('Utilities', 'expense'), ('Dining', 'expense'),
       ('Health', 'expense'), ('Entertainment', 'expense'), ('Other expense', 'expense');`,
+  `ALTER TABLE categories ADD COLUMN color TEXT NOT NULL DEFAULT '#1687F8';
+   UPDATE categories SET color = CASE name
+     WHEN 'Salary' THEN '#2F9E66'
+     WHEN 'Freelance' THEN '#4C8BF5'
+     WHEN 'Interest' THEN '#8B78BD'
+     WHEN 'Other income' THEN '#4FA89A'
+     WHEN 'Housing' THEN '#D66A5C'
+     WHEN 'Groceries' THEN '#E59A55'
+     WHEN 'Transport' THEN '#D6B84C'
+     WHEN 'Utilities' THEN '#5C91B8'
+     WHEN 'Dining' THEN '#BD70A0'
+     WHEN 'Health' THEN '#69A781'
+     WHEN 'Entertainment' THEN '#8B78BD'
+     WHEN 'Other expense' THEN '#8E9B72'
+     ELSE color END;`,
 ];
 
 interface TransactionRow {
@@ -45,6 +61,7 @@ interface TransactionRow {
   account_name: string;
   category_id: number;
   category_name: string;
+  category_color: string;
   type: 'income' | 'expense';
   amount_cents: number;
   description: string;
@@ -57,6 +74,7 @@ const mapTransaction = (row: TransactionRow): Transaction => ({
   accountName: row.account_name,
   categoryId: row.category_id,
   categoryName: row.category_name,
+  categoryColor: row.category_color,
   type: row.type,
   amountCents: row.amount_cents,
   description: row.description,
@@ -64,7 +82,7 @@ const mapTransaction = (row: TransactionRow): Transaction => ({
 });
 
 const transactionSelect = `SELECT t.id, t.account_id, a.name AS account_name,
-  t.category_id, c.name AS category_name, t.type, t.amount_cents,
+  t.category_id, c.name AS category_name, c.color AS category_color, t.type, t.amount_cents,
   t.description, t.transaction_date FROM transactions t
   JOIN accounts a ON a.id = t.account_id JOIN categories c ON c.id = t.category_id`;
 
@@ -96,7 +114,9 @@ export class DatabaseService {
       .prepare('SELECT id, name FROM accounts ORDER BY name')
       .all() as Account[];
     const categories = this.db
-      .prepare('SELECT id, name, type FROM categories ORDER BY type DESC, name')
+      .prepare(
+        'SELECT id, name, type, color FROM categories ORDER BY type DESC, name',
+      )
       .all() as Category[];
     return { accounts, categories };
   }
@@ -107,12 +127,13 @@ export class DatabaseService {
     if (input.type !== 'income' && input.type !== 'expense') {
       throw new Error('Category type is invalid.');
     }
+    const color = this.validateColor(input.color);
     try {
       const result = this.db
-        .prepare('INSERT INTO categories (name, type) VALUES (?, ?)')
-        .run(name, input.type);
+        .prepare('INSERT INTO categories (name, type, color) VALUES (?, ?, ?)')
+        .run(name, input.type, color);
       return this.db
-        .prepare('SELECT id, name, type FROM categories WHERE id = ?')
+        .prepare('SELECT id, name, type, color FROM categories WHERE id = ?')
         .get(result.lastInsertRowid) as Category;
     } catch (error) {
       if (error instanceof Error && error.message.includes('UNIQUE')) {
@@ -120,6 +141,49 @@ export class DatabaseService {
       }
       throw error;
     }
+  }
+
+  updateCategory(input: UpdateCategoryInput): Category {
+    if (!Number.isSafeInteger(input.id))
+      throw new Error('Category is invalid.');
+    const name = input.name.trim().replace(/\s+/g, ' ').slice(0, 60);
+    if (!name) throw new Error('Category name is required.');
+    if (input.type !== 'income' && input.type !== 'expense')
+      throw new Error('Category type is invalid.');
+    const color = this.validateColor(input.color);
+    const existing = this.db
+      .prepare('SELECT type FROM categories WHERE id = ?')
+      .get(input.id) as { type: string } | undefined;
+    if (!existing) throw new Error('Category not found.');
+    if (existing.type !== input.type) {
+      const usage = this.db
+        .prepare(
+          'SELECT COUNT(*) AS count FROM transactions WHERE category_id = ?',
+        )
+        .get(input.id) as { count: number };
+      if (usage.count > 0)
+        throw new Error('The type of a category in use cannot be changed.');
+    }
+    try {
+      this.db
+        .prepare(
+          'UPDATE categories SET name = ?, type = ?, color = ? WHERE id = ?',
+        )
+        .run(name, input.type, color, input.id);
+      return this.db
+        .prepare('SELECT id, name, type, color FROM categories WHERE id = ?')
+        .get(input.id) as Category;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('UNIQUE'))
+        throw new Error('That category already exists.');
+      throw error;
+    }
+  }
+
+  private validateColor(color: string): string {
+    if (!/^#[0-9a-f]{6}$/i.test(color))
+      throw new Error('Category color is invalid.');
+    return color.toUpperCase();
   }
 
   deleteCategory(id: number): void {
@@ -260,10 +324,10 @@ export class DatabaseService {
         : '';
     const parameters = scope === 'month' ? [monthStart, monthEnd] : [];
     const rows = this.db
-      .prepare(`SELECT c.id AS categoryId, c.name AS categoryName, t.type,
+      .prepare(`SELECT c.id AS categoryId, c.name AS categoryName, c.color AS categoryColor, t.type,
         SUM(t.amount_cents) AS amountCents FROM transactions t
         JOIN categories c ON c.id = t.category_id ${where}
-        GROUP BY c.id, c.name, t.type ORDER BY amountCents DESC`)
+        GROUP BY c.id, c.name, c.color, t.type ORDER BY amountCents DESC`)
       .all(...parameters) as Analytics['categoryTotals'];
     return {
       incomeCents: rows

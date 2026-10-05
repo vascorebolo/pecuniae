@@ -57,7 +57,7 @@
 
   form {
     display: grid;
-    grid-template-columns: minmax(180px, 1fr) 150px auto;
+    grid-template-columns: minmax(180px, 1fr) 150px 44px auto;
     gap: 8px;
     margin: 18px 0;
 
@@ -69,6 +69,12 @@
       border-radius: 7px;
       color: var(--text);
       background: var(--surface-active);
+    }
+
+    .colorPicker {
+      width: 44px;
+      padding: 3px;
+      cursor: pointer;
     }
 
     button {
@@ -109,6 +115,18 @@
       border-bottom: 1px solid var(--divider);
       font-size: 13px;
 
+      .categoryName {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+
+        i {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+      }
+
       button {
         border: 0;
         color: var(--text-muted);
@@ -117,6 +135,40 @@
 
         &:hover {
           color: var(--negative);
+        }
+      }
+
+      .rowActions {
+        display: flex;
+        gap: 4px;
+      }
+
+      &.editRow {
+        display: grid;
+        grid-template-columns: minmax(100px, 1fr) 100px 40px;
+        gap: 6px;
+        padding: 7px 0;
+
+        input,
+        select {
+          min-width: 0;
+          padding: 7px;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          color: var(--text);
+          background: var(--surface-active);
+        }
+
+        .colorPicker {
+          width: 40px;
+          padding: 3px;
+          cursor: pointer;
+        }
+        .editActions {
+          display: flex;
+          grid-column: 1 / -1;
+          justify-content: flex-end;
+          gap: 5px;
         }
       }
     }

@@ -3,6 +3,7 @@ import type {
   CreateCategoryInput,
   CreateTransactionInput,
   PecuniaeApi,
+  UpdateCategoryInput,
   UpdateTransactionInput,
 } from './shared';
 
@@ -18,6 +19,8 @@ const api: PecuniaeApi = {
     ipcRenderer.invoke('pecuniae:create-category', input),
   deleteCategory: (id: number) =>
     ipcRenderer.invoke('pecuniae:delete-category', id),
+  updateCategory: (input: UpdateCategoryInput) =>
+    ipcRenderer.invoke('pecuniae:update-category', input),
   updateTransaction: (input: UpdateTransactionInput) =>
     ipcRenderer.invoke('pecuniae:update-transaction', input),
   deleteTransaction: (id: number) =>

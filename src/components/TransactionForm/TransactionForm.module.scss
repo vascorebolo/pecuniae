@@ -116,6 +116,13 @@
     flex: 1;
   }
 
+  .newCategory .colorPicker {
+    width: 42px;
+    flex: 0 0 42px;
+    padding: 3px;
+    cursor: pointer;
+  }
+
   .primary {
     padding: 11px;
     border: 0;

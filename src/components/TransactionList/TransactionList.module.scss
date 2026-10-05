@@ -94,8 +94,18 @@
         white-space: nowrap;
       }
       span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
         color: var(--text-muted);
         font-size: 11px;
+      }
+
+      .categoryColor {
+        width: 7px;
+        height: 7px;
+        flex: 0 0 7px;
+        border-radius: 50%;
       }
     }
 

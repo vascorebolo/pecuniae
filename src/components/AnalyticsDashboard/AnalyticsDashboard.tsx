@@ -182,17 +182,6 @@ export function AnalyticsDashboard({ month, dataVersion }: Props) {
   );
 }
 
-const pieColors = [
-  '#d66a5c',
-  '#e59a55',
-  '#d6b84c',
-  '#69a781',
-  '#5c91b8',
-  '#8b78bd',
-  '#bd70a0',
-  '#8e9b72',
-];
-
 function PieChart({
   title,
   rows,
@@ -204,10 +193,10 @@ function PieChart({
 }) {
   const total = rows.reduce((sum, row) => sum + row.amountCents, 0);
   let position = 0;
-  const stops = rows.map((row, index) => {
+  const stops = rows.map((row) => {
     const start = position;
     position += total ? (row.amountCents / total) * 100 : 0;
-    return `${pieColors[index % pieColors.length]} ${start}% ${position}%`;
+    return `${row.categoryColor} ${start}% ${position}%`;
   });
   const description = rows
     .map(
@@ -251,15 +240,13 @@ function PieChart({
           <span className={styles.noData}>No data</span>
         ) : (
           <ul>
-            {rows.map((row, index) => (
+            {rows.map((row) => (
               <li
                 key={row.categoryId}
                 onDoubleClick={() => onExclude(row.categoryId)}
                 title="Double-click to exclude"
               >
-                <i
-                  style={{ background: pieColors[index % pieColors.length] }}
-                />
+                <i style={{ background: row.categoryColor }} />
                 <span>{row.categoryName}</span>
                 <b>{Math.round((row.amountCents / total) * 100)}%</b>
               </li>

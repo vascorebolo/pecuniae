@@ -5,6 +5,7 @@ import { DatabaseService } from './database';
 import type {
   CreateCategoryInput,
   CreateTransactionInput,
+  UpdateCategoryInput,
   UpdateTransactionInput,
 } from './shared';
 
@@ -32,6 +33,10 @@ const registerIpc = (db: DatabaseService) => {
   );
   ipcMain.handle('pecuniae:delete-category', (_event, id: number) =>
     db.deleteCategory(id),
+  );
+  ipcMain.handle(
+    'pecuniae:update-category',
+    (_event, input: UpdateCategoryInput) => db.updateCategory(input),
   );
   ipcMain.handle(
     'pecuniae:update-transaction',

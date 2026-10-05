@@ -290,6 +290,10 @@ export function TransactionList({
                 <div className={styles.details}>
                   <strong>{item.description || item.categoryName}</strong>
                   <span>
+                    <i
+                      className={styles.categoryColor}
+                      style={{ background: item.categoryColor }}
+                    />
                     {item.categoryName} · {item.transactionDate}
                   </span>
                 </div>
