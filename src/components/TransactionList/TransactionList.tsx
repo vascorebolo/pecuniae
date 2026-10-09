@@ -34,7 +34,9 @@ export function TransactionList({
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [typeFilter, setTypeFilter] = useState<'all' | TransactionType>('all');
+  const [typeFilter, setTypeFilter] = useState<
+    'all' | 'shared' | TransactionType
+  >('all');
   const [highlightedId, setHighlightedId] = useState<number>();
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
@@ -60,7 +62,13 @@ export function TransactionList({
     const search = query.trim().toLocaleLowerCase();
     return transactions
       .filter((item) => {
-        if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+        if (typeFilter === 'shared' && !item.splitInHalf) return false;
+        if (
+          typeFilter !== 'all' &&
+          typeFilter !== 'shared' &&
+          item.type !== typeFilter
+        )
+          return false;
         if (!search) return true;
         return [
           item.description,
@@ -150,7 +158,7 @@ export function TransactionList({
         Transactions · {formatMonth(month)}
       </h2>
       <div className={styles.typeFilter} aria-label="Filter transaction type">
-        {(['all', 'expense', 'income'] as const).map((filter) => (
+        {(['all', 'expense', 'income', 'shared'] as const).map((filter) => (
           <Button
             key={filter}
             className={typeFilter === filter ? styles.active : ''}
@@ -161,7 +169,9 @@ export function TransactionList({
               ? 'All'
               : filter === 'expense'
                 ? 'Expenses'
-                : 'Income'}
+                : filter === 'income'
+                  ? 'Income'
+                  : 'Shared'}
           </Button>
         ))}
       </div>
