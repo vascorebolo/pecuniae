@@ -21,6 +21,7 @@ export interface Transaction {
   amountCents: number;
   description: string;
   transactionDate: string;
+  splitInHalf: boolean;
 }
 export interface CreateTransactionInput {
   accountId: number;
@@ -29,6 +30,7 @@ export interface CreateTransactionInput {
   amountCents: number;
   description: string;
   transactionDate: string;
+  splitInHalf: boolean;
 }
 export interface UpdateTransactionInput extends CreateTransactionInput {
   id: number;
@@ -38,6 +40,7 @@ export interface Dashboard {
   balanceCents: number;
   monthIncomeCents: number;
   monthExpenseCents: number;
+  monthSharedExpenseCents: number;
   recentTransactions: Transaction[];
 }
 export interface CategoryTotal {

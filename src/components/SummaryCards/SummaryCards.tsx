@@ -5,9 +5,14 @@ import { Icon } from '../Icon/Icon';
 interface SummaryCardsProps {
   incomeCents: number;
   expenseCents: number;
+  sharedExpenseCents: number;
 }
 
-export function SummaryCards({ incomeCents, expenseCents }: SummaryCardsProps) {
+export function SummaryCards({
+  incomeCents,
+  expenseCents,
+  sharedExpenseCents,
+}: SummaryCardsProps) {
   const balanceCents = incomeCents - expenseCents;
   return (
     <section className={styles.summary} aria-label="Monthly summary">
@@ -25,6 +30,15 @@ export function SummaryCards({ incomeCents, expenseCents }: SummaryCardsProps) {
         </span>
         <strong className={styles.negative}>
           −{formatMoney(expenseCents)}
+        </strong>
+      </article>
+      <article>
+        <span>
+          <Icon name="balance" />
+          Shared expenses
+        </span>
+        <strong className={styles.negative}>
+          −{formatMoney(sharedExpenseCents)}
         </strong>
       </article>
       <article>

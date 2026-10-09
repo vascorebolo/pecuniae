@@ -19,6 +19,7 @@ interface EditState {
   description: string;
   transactionDate: string;
   accountId: number;
+  splitInHalf: boolean;
 }
 
 export function TransactionList({
@@ -90,6 +91,7 @@ export function TransactionList({
       description: item.description,
       transactionDate: item.transactionDate,
       accountId: item.accountId,
+      splitInHalf: item.splitInHalf,
     });
   };
 
@@ -109,6 +111,7 @@ export function TransactionList({
         amountCents,
         description: edit.description,
         transactionDate: edit.transactionDate,
+        splitInHalf: edit.splitInHalf,
       });
       setEdit(undefined);
       pulseRow(edit.id);
@@ -222,6 +225,10 @@ export function TransactionList({
                         ...edit,
                         type: event.target.value as TransactionType,
                         categoryId: '',
+                        splitInHalf:
+                          event.target.value === 'expense'
+                            ? edit.splitInHalf
+                            : false,
                       })
                     }
                   >
@@ -260,6 +267,33 @@ export function TransactionList({
                       setEdit({ ...edit, transactionDate: event.target.value })
                     }
                   />
+                  {edit.type === 'expense' && (
+                    <fieldset className={styles.editSharing}>
+                      <legend>Sharing</legend>
+                      <label>
+                        <input
+                          type="radio"
+                          name={`edit-sharing-${edit.id}`}
+                          checked={!edit.splitInHalf}
+                          onChange={() =>
+                            setEdit({ ...edit, splitInHalf: false })
+                          }
+                        />
+                        Full amount
+                      </label>
+                      <label>
+                        <input
+                          type="radio"
+                          name={`edit-sharing-${edit.id}`}
+                          checked={edit.splitInHalf}
+                          onChange={() =>
+                            setEdit({ ...edit, splitInHalf: true })
+                          }
+                        />
+                        Divide by 2
+                      </label>
+                    </fieldset>
+                  )}
                 </div>
                 <div className={styles.editActions}>
                   <Button
@@ -295,6 +329,7 @@ export function TransactionList({
                       style={{ background: item.categoryColor }}
                     />
                     {item.categoryName} · {item.transactionDate}
+                    {item.splitInHalf && ' · Shared ÷ 2'}
                   </span>
                 </div>
                 <div className={styles.rowEnd}>

@@ -63,6 +63,7 @@ export function App() {
       <SummaryCards
         incomeCents={dashboard?.monthIncomeCents ?? 0}
         expenseCents={dashboard?.monthExpenseCents ?? 0}
+        sharedExpenseCents={dashboard?.monthSharedExpenseCents ?? 0}
       />
       {loadError && <p className={styles.error}>{loadError}</p>}
       <div className={styles.layout}>

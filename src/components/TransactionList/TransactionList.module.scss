@@ -184,6 +184,36 @@
     .description {
       grid-column: 1 / -1;
     }
+
+    .editSharing {
+      display: flex;
+      grid-column: 1 / -1;
+      align-items: center;
+      gap: 14px;
+      margin: 0;
+      padding: 7px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+
+      legend {
+        padding: 0 4px;
+        color: var(--text-muted);
+        font-size: 10px;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--text-muted);
+        font-size: 11px;
+      }
+      input {
+        width: auto;
+        margin: 0;
+        padding: 0;
+        accent-color: var(--accent);
+      }
+    }
   }
 
   .editActions {

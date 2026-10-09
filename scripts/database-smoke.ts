@@ -37,6 +37,7 @@ try {
     amountCents: 12345,
     description: 'Persistence test',
     transactionDate: new Date().toISOString().slice(0, 10),
+    splitInHalf: false,
   });
   first.close();
 
@@ -62,9 +63,11 @@ try {
     amountCents: 500,
     description: 'Historical transaction',
     transactionDate: '2000-01-15',
+    splitInHalf: true,
   });
   const historical = reopened.getDashboard('2000-01');
   assert.equal(historical.monthIncomeCents, 500);
+  assert.equal(historical.monthSharedExpenseCents, 0);
   assert.equal(historical.recentTransactions.length, 1);
   assert.equal(reopened.getDashboard('2000-02').recentTransactions.length, 0);
   const monthlyAnalytics = reopened.getAnalytics('month', '2000-01');
@@ -78,6 +81,21 @@ try {
     category.color,
   );
   assert.equal(reopened.getAnalytics('all', '2000-01').incomeCents, 12845);
+  const expenseCategory = options.categories.find(
+    (item) => item.type === 'expense',
+  );
+  assert.ok(expenseCategory);
+  const sharedExpense = reopened.addTransaction({
+    accountId: options.accounts[0].id,
+    categoryId: expenseCategory.id,
+    type: 'expense',
+    amountCents: 1001,
+    description: 'Shared expense test',
+    transactionDate: '2000-01-20',
+    splitInHalf: true,
+  });
+  assert.equal(reopened.getDashboard('2000-01').monthSharedExpenseCents, 501);
+  reopened.deleteTransaction(sharedExpense.id);
   const updated = reopened.updateTransaction({
     id: transaction.id,
     accountId: transaction.accountId,
@@ -86,6 +104,7 @@ try {
     amountCents: 15000,
     description: 'Updated persistence test',
     transactionDate: transaction.transactionDate,
+    splitInHalf: false,
   });
   assert.equal(updated.amountCents, 15000);
   assert.equal(reopened.getDashboard().balanceCents, 15500);

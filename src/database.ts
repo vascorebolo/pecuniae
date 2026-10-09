@@ -53,6 +53,8 @@ const migrations = [
      WHEN 'Entertainment' THEN '#8B78BD'
      WHEN 'Other expense' THEN '#8E9B72'
      ELSE color END;`,
+  `ALTER TABLE transactions ADD COLUMN split_in_half INTEGER NOT NULL DEFAULT 0
+     CHECK (split_in_half IN (0, 1));`,
 ];
 
 interface TransactionRow {
@@ -66,6 +68,7 @@ interface TransactionRow {
   amount_cents: number;
   description: string;
   transaction_date: string;
+  split_in_half: number;
 }
 
 const mapTransaction = (row: TransactionRow): Transaction => ({
@@ -79,11 +82,12 @@ const mapTransaction = (row: TransactionRow): Transaction => ({
   amountCents: row.amount_cents,
   description: row.description,
   transactionDate: row.transaction_date,
+  splitInHalf: row.split_in_half === 1,
 });
 
 const transactionSelect = `SELECT t.id, t.account_id, a.name AS account_name,
   t.category_id, c.name AS category_name, c.color AS category_color, t.type, t.amount_cents,
-  t.description, t.transaction_date FROM transactions t
+  t.description, t.transaction_date, t.split_in_half FROM transactions t
   JOIN accounts a ON a.id = t.account_id JOIN categories c ON c.id = t.category_id`;
 
 export class DatabaseService {
@@ -206,8 +210,8 @@ export class DatabaseService {
     this.validateTransaction(input);
     const result = this.db
       .prepare(`INSERT INTO transactions
-      (account_id, category_id, type, amount_cents, description, transaction_date)
-      VALUES (?, ?, ?, ?, ?, ?)`)
+      (account_id, category_id, type, amount_cents, description, transaction_date, split_in_half)
+      VALUES (?, ?, ?, ?, ?, ?, ?)`)
       .run(
         input.accountId,
         input.categoryId,
@@ -215,6 +219,7 @@ export class DatabaseService {
         input.amountCents,
         input.description.trim().slice(0, 200),
         input.transactionDate,
+        input.type === 'expense' && input.splitInHalf ? 1 : 0,
       );
     return this.getTransaction(Number(result.lastInsertRowid));
   }
@@ -225,7 +230,7 @@ export class DatabaseService {
     this.validateTransaction(input);
     const result = this.db
       .prepare(`UPDATE transactions SET account_id = ?, category_id = ?, type = ?,
-        amount_cents = ?, description = ?, transaction_date = ? WHERE id = ?`)
+        amount_cents = ?, description = ?, transaction_date = ?, split_in_half = ? WHERE id = ?`)
       .run(
         input.accountId,
         input.categoryId,
@@ -233,6 +238,7 @@ export class DatabaseService {
         input.amountCents,
         input.description.trim().slice(0, 200),
         input.transactionDate,
+        input.type === 'expense' && input.splitInHalf ? 1 : 0,
         input.id,
       );
     if (!result.changes) throw new Error('Transaction not found.');
@@ -288,11 +294,20 @@ export class DatabaseService {
       COALESCE(SUM(CASE WHEN type = 'income' THEN amount_cents ELSE -amount_cents END), 0) AS balance,
       COALESCE(SUM(CASE WHEN type = 'income' AND transaction_date >= ? AND transaction_date < ? THEN amount_cents ELSE 0 END), 0) AS month_income,
       COALESCE(SUM(CASE WHEN type = 'expense' AND transaction_date >= ? AND transaction_date < ? THEN amount_cents ELSE 0 END), 0) AS month_expense
+      , CAST(ROUND(COALESCE(SUM(CASE WHEN type = 'expense' AND split_in_half = 1 AND transaction_date >= ? AND transaction_date < ? THEN amount_cents ELSE 0 END), 0) / 2.0) AS INTEGER) AS month_shared_expense
       FROM transactions`)
-      .get(monthStart, monthEnd, monthStart, monthEnd) as {
+      .get(
+        monthStart,
+        monthEnd,
+        monthStart,
+        monthEnd,
+        monthStart,
+        monthEnd,
+      ) as {
       balance: number;
       month_income: number;
       month_expense: number;
+      month_shared_expense: number;
     };
     const rows = this.db
       .prepare(
@@ -305,6 +320,7 @@ export class DatabaseService {
       balanceCents: totals.balance,
       monthIncomeCents: totals.month_income,
       monthExpenseCents: totals.month_expense,
+      monthSharedExpenseCents: totals.month_shared_expense,
       recentTransactions: rows.map(mapTransaction),
     };
   }

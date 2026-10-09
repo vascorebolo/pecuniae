@@ -23,6 +23,7 @@ export function TransactionForm({
   const [date, setDate] = useState(getToday());
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [splitInHalf, setSplitInHalf] = useState(false);
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#1687F8');
@@ -31,7 +32,10 @@ export function TransactionForm({
     [options, type],
   );
 
-  useEffect(() => setCategoryId(''), [type]);
+  useEffect(() => {
+    setCategoryId('');
+    if (type === 'income') setSplitInHalf(false);
+  }, [type]);
 
   const createCategory = async () => {
     setError('');
@@ -75,6 +79,7 @@ export function TransactionForm({
         amountCents,
         description,
         transactionDate: date,
+        splitInHalf,
       });
       setAmount('');
       setDescription('');
@@ -170,6 +175,29 @@ export function TransactionForm({
               Create
             </Button>
           </div>
+        )}
+        {type === 'expense' && (
+          <fieldset className={styles.sharingChoice}>
+            <legend>Expense sharing</legend>
+            <label>
+              <input
+                type="radio"
+                name="expense-sharing"
+                checked={!splitInHalf}
+                onChange={() => setSplitInHalf(false)}
+              />
+              Full amount
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="expense-sharing"
+                checked={splitInHalf}
+                onChange={() => setSplitInHalf(true)}
+              />
+              Divide by 2
+            </label>
+          </fieldset>
         )}
         <label>
           Description <small>optional</small>
