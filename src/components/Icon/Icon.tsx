@@ -7,7 +7,8 @@ export type IconName =
   | 'overview'
   | 'add'
   | 'transactions'
-  | 'categories';
+  | 'categories'
+  | 'investments';
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   name: IconName;
@@ -57,6 +58,12 @@ const paths: Record<IconName, React.ReactNode> = {
   categories: (
     <>
       <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />
+    </>
+  ),
+  investments: (
+    <>
+      <path d="M4 19V10M10 19V5M16 19v-7M22 19H2" />
+      <path d="m3 7 6-4 6 6 6-5" />
     </>
   ),
 };

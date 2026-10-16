@@ -1,0 +1,46 @@
+.placeholder {
+  display: grid;
+  min-height: 430px;
+  place-content: center;
+  justify-items: center;
+  padding: 52px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 2px 12px var(--shadow);
+  text-align: center;
+
+  .icon {
+    display: grid;
+    width: 62px;
+    height: 62px;
+    margin-bottom: 20px;
+    place-items: center;
+    border-radius: 18px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .eyebrow {
+    margin: 0 0 7px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: Georgia, serif;
+    font-size: 34px;
+    font-weight: 500;
+  }
+
+  > p:last-child {
+    max-width: 430px;
+    margin: 13px 0 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+}

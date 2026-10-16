@@ -1,0 +1,126 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  width: 72px;
+  height: 100vh;
+  flex-direction: column;
+  padding: 36px 13px 24px;
+  border-right: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 8px 0 24px transparent;
+  overflow: hidden;
+  transition:
+    width 0.35s ease,
+    box-shadow 0.35s ease;
+  transition-delay: 0s;
+
+  &:hover {
+    width: 220px;
+    box-shadow: 8px 0 24px var(--shadow);
+    transition-delay: 2s;
+  }
+
+  &:focus-within {
+    width: 220px;
+    box-shadow: 8px 0 24px var(--shadow);
+    transition-delay: 0s;
+  }
+
+  .logo {
+    width: 170px;
+    min-width: 170px;
+    height: auto;
+    margin: 0 0 36px;
+  }
+
+  nav {
+    display: grid;
+    gap: 6px;
+  }
+
+  button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 13px;
+    border: 0;
+    border-radius: 9px;
+    color: var(--text-muted);
+    background: transparent;
+    font-weight: 650;
+    text-align: left;
+    white-space: nowrap;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      transform 160ms ease;
+
+    svg {
+      min-width: 19px;
+    }
+
+    span {
+      opacity: 0;
+      transition: opacity 160ms ease;
+    }
+
+    &:hover {
+      color: var(--text);
+      background: var(--surface-muted);
+      transform: translateX(2px);
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--focus);
+    }
+
+    &.active {
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+  }
+
+  .localNote {
+    width: 170px;
+    margin: auto 13px 0;
+    color: var(--text-subtle);
+    font-size: 10px;
+    line-height: 1.45;
+    opacity: 0;
+    transition: opacity 160ms ease;
+  }
+
+  &:hover,
+  &:focus-within {
+    button span,
+    .localNote {
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    button span,
+    .localNote {
+      transition-delay: 2.12s;
+    }
+  }
+
+  &:focus-within {
+    button span,
+    .localNote {
+      transition-delay: 0.12s;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 0.01ms;
+
+    &:hover {
+      transition-delay: 2s;
+    }
+  }
+}

@@ -1,5 +1,12 @@
+.shell {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
 .app {
-  max-width: 1120px;
+  width: 100%;
+  max-width: 1216px;
   margin: 0 auto;
   padding: 42px 48px 56px;
 

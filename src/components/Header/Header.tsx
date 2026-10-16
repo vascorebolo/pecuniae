@@ -1,15 +1,20 @@
 import { formatMoney } from '../../utils/format';
 import styles from './Header.module.scss';
 import { Button } from '../Button/Button';
-import logoUrl from '../../assets/logo.svg';
 
 interface HeaderProps {
-  balanceCents: number;
+  balanceCents?: number;
+  title: string;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
 }
 
-export function Header({ balanceCents, theme, onToggleTheme }: HeaderProps) {
+export function Header({
+  balanceCents,
+  title,
+  theme,
+  onToggleTheme,
+}: HeaderProps) {
   const currentDate = new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
     day: 'numeric',
@@ -31,14 +36,16 @@ export function Header({ balanceCents, theme, onToggleTheme }: HeaderProps) {
           </Button>
           <span className={styles.eyebrow}>{currentDate}</span>
         </div>
-        <img className={styles.logo} src={logoUrl} alt="Pecuniae" />
+        <h1>{title}</h1>
       </div>
-      <div className={styles.actions}>
-        <div className={styles.balance}>
-          <span>Total balance</span>
-          <strong>{formatMoney(balanceCents)}</strong>
+      {balanceCents !== undefined && (
+        <div className={styles.actions}>
+          <div className={styles.balance}>
+            <span>Total balance</span>
+            <strong>{formatMoney(balanceCents)}</strong>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }

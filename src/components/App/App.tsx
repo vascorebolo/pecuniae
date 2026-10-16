@@ -10,6 +10,8 @@ import { TransactionList } from '../TransactionList/TransactionList';
 import styles from './App.module.scss';
 import { getCurrentMonth } from '../../utils/format';
 import { LoadingScreen } from '../LoadingScreen/LoadingScreen';
+import { Sidebar, type AppView } from '../Sidebar/Sidebar';
+import { InvestmentsPlaceholder } from '../InvestmentsPlaceholder/InvestmentsPlaceholder';
 
 type Theme = 'light' | 'dark';
 
@@ -27,6 +29,12 @@ export function App() {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth);
   const [dataVersion, setDataVersion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeView, setActiveView] = useState<AppView>(() => {
+    const saved = localStorage.getItem('pecuniae-view');
+    return saved === 'investments' || saved === 'categories'
+      ? saved
+      : 'expenses';
+  });
 
   const refresh = async () => {
     const [nextDashboard, nextOptions] = await Promise.all([
@@ -49,40 +57,71 @@ export function App() {
     localStorage.setItem('pecuniae-theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    localStorage.setItem('pecuniae-view', activeView);
+  }, [activeView]);
+
   if (isLoading) return <LoadingScreen />;
 
+  const titles: Record<AppView, string> = {
+    expenses: 'Expense tracker',
+    investments: 'Investments',
+    categories: 'Categories',
+  };
+
   return (
-    <main className={styles.app}>
-      <Header
-        balanceCents={dashboard?.balanceCents ?? 0}
-        theme={theme}
-        onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      />
-      <MonthNavigator month={selectedMonth} onMonthChange={setSelectedMonth} />
-      <AnalyticsDashboard month={selectedMonth} dataVersion={dataVersion} />
-      <SummaryCards
-        incomeCents={dashboard?.monthIncomeCents ?? 0}
-        expenseCents={dashboard?.monthExpenseCents ?? 0}
-        sharedExpenseCents={dashboard?.monthSharedExpenseCents ?? 0}
-      />
-      {loadError && <p className={styles.error}>{loadError}</p>}
-      <div className={styles.layout}>
-        <TransactionForm
-          options={options}
-          onSaved={refresh}
-          onCategoriesChanged={refresh}
+    <div className={styles.shell}>
+      <Sidebar activeView={activeView} onNavigate={setActiveView} />
+      <main className={styles.app}>
+        <Header
+          balanceCents={
+            activeView === 'expenses'
+              ? (dashboard?.balanceCents ?? 0)
+              : undefined
+          }
+          title={titles[activeView]}
+          theme={theme}
+          onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         />
-        <TransactionList
-          transactions={dashboard?.recentTransactions ?? []}
-          categories={options?.categories ?? []}
-          month={selectedMonth}
-          onTransactionsChanged={refresh}
-        />
-      </div>
-      <CategoryManager
-        categories={options?.categories ?? []}
-        onCategoriesChanged={refresh}
-      />
-    </main>
+        {activeView === 'expenses' && (
+          <>
+            <MonthNavigator
+              month={selectedMonth}
+              onMonthChange={setSelectedMonth}
+            />
+            <AnalyticsDashboard
+              month={selectedMonth}
+              dataVersion={dataVersion}
+            />
+            <SummaryCards
+              incomeCents={dashboard?.monthIncomeCents ?? 0}
+              expenseCents={dashboard?.monthExpenseCents ?? 0}
+              sharedExpenseCents={dashboard?.monthSharedExpenseCents ?? 0}
+            />
+            {loadError && <p className={styles.error}>{loadError}</p>}
+            <div className={styles.layout}>
+              <TransactionForm
+                options={options}
+                onSaved={refresh}
+                onCategoriesChanged={refresh}
+              />
+              <TransactionList
+                transactions={dashboard?.recentTransactions ?? []}
+                categories={options?.categories ?? []}
+                month={selectedMonth}
+                onTransactionsChanged={refresh}
+              />
+            </div>
+          </>
+        )}
+        {activeView === 'investments' && <InvestmentsPlaceholder />}
+        {activeView === 'categories' && (
+          <CategoryManager
+            categories={options?.categories ?? []}
+            onCategoriesChanged={refresh}
+          />
+        )}
+      </main>
+    </div>
   );
 }
